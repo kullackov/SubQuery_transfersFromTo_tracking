@@ -1,0 +1,23 @@
+type Account @entity {
+  id: ID!
+}
+
+# transfers count and total transfer volume from one account to the other accound
+type TransferFromTo @entity {
+  id: ID!  # from + to
+  from: Account!
+  to: Account!
+  count: Int!
+  totalVolume: BigInt!
+  lastTransferDate: Date!
+}
+
+# transfers count and total transfer volume from one account to the other account with history
+type TransfersHistory @entity {
+  id: ID!  # block id + event id
+  fromTo: TransferFromTo
+  count: Int!
+  totalVolume: BigInt!
+  blockHeight: Int!
+  date: Date!
+}
