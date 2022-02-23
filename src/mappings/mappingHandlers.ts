@@ -1,5 +1,5 @@
 import {SubstrateEvent} from "@subql/types";
-import {Account, TransferFromTo, TransfersHistory} from "../types";
+import {Account, FromToTransfer, TransfersHistory} from "../types";
 import {Balance} from "@polkadot/types/interfaces";
 
 async function getAccount(id: string): Promise<Account> {
@@ -11,11 +11,11 @@ async function getAccount(id: string): Promise<Account> {
     return account;
 }
 
-async function getTransferFromTo(from: Account, to: Account): Promise<TransferFromTo> {
+async function getFromToTransfer(from: Account, to: Account): Promise<FromToTransfer> {
     const id = `${from.id}-${to.id}`;
-    let transfer = await TransferFromTo.get(id);
+    let transfer = await FromToTransfer.get(id);
     if (transfer === undefined) {
-        transfer = new TransferFromTo(id);
+        transfer = new FromToTransfer(id);
         transfer.fromId = from.id;
         transfer.toId = to.id;
         transfer.count = 0;
@@ -33,21 +33,21 @@ export async function handleTransfer(event: SubstrateEvent): Promise<void> {
     const fromAccount = await getAccount(eventFromAccount.toString());
     const toAccount = await getAccount(eventToAccount.toString());
 
-    const transferFromTo = await getTransferFromTo(fromAccount, toAccount);
-    transferFromTo.count += 1;
-    transferFromTo.totalVolume += (balance as Balance).toBigInt();
-    transferFromTo.lastTransferDate = blockDate;
+    const fromToTransfer = await getFromToTransfer(fromAccount, toAccount);
+    fromToTransfer.count += 1;
+    fromToTransfer.totalVolume += (balance as Balance).toBigInt();
+    fromToTransfer.lastTransferDate = blockDate;
 
     const uniqueId = `${event.block.block.header.number}-${event.idx.toString()}`;
 
     const transfersHistory = new TransfersHistory(uniqueId);
-    transfersHistory.fromToId = transferFromTo.id;
-    transfersHistory.count = transferFromTo.count;
-    transfersHistory.totalVolume = transferFromTo.totalVolume;
+    transfersHistory.fromToId = fromToTransfer.id;
+    transfersHistory.count = fromToTransfer.count;
+    transfersHistory.totalVolume = fromToTransfer.totalVolume;
     transfersHistory.blockHeight = blockHeight;
     transfersHistory.date = blockDate;
 
-    await transferFromTo.save();
+    await fromToTransfer.save();
     await transfersHistory.save();    
 }
 

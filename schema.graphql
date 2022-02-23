@@ -3,7 +3,7 @@ type Account @entity {
 }
 
 # transfers count and total transfer volume from one account to the other accound
-type TransferFromTo @entity {
+type FromToTransfer @entity {
   id: ID!  # from + to
   from: Account!
   to: Account!
@@ -15,7 +15,7 @@ type TransferFromTo @entity {
 # transfers count and total transfer volume from one account to the other account with history
 type TransfersHistory @entity {
   id: ID!  # block id + event id
-  fromTo: TransferFromTo
+  fromTo: FromToTransfer
   count: Int!
   totalVolume: BigInt!
   blockHeight: Int!
